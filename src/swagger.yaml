@@ -1,0 +1,217 @@
+openapi: 3.0.1
+
+info:
+  title: Api Tool Repository Manager
+  description: 'App to manage technology tool links'
+  contact:
+    name: David Faria
+    email: davidfaria89@gmail.com
+  license:
+    name: MIT
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+tags:
+  - name: session
+    description: Auth JWT Session
+  - name: user
+    description: Operations about user
+  - name: tool
+    description: Everything about your Tools
+
+paths:
+  /sessions:
+    post:
+      tags:
+        - session
+      summary: Generate a session authenticated with jWT token
+      requestBody:
+        description: Credentials object that needs to be get session JWT
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Session'
+        required: true
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSession'
+        400:
+          description: Credential invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /tools:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - tool
+      summary: List all tools
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToolPaginate'
+
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - tool
+      summary: Add a new tool to the database
+      requestBody:
+        description: Tool object that needs to be added to the database
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tool'
+        required: true
+      responses:
+        201:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tool'
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /tools/{id}:
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - tool
+      summary: Remove a tool of the database
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: It the ID tool in database that will be removed
+          schema:
+            type: integer
+            format: int
+            minimum: 1
+      responses:
+        204:
+          description: OK
+
+  '/tools/search':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - tool
+      summary: List tools by tag
+      parameters:
+        - in: query
+          name: tag
+          schema:
+            type: string
+          description: The tag for search
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToolPaginate'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+      required:
+        - code
+        - message
+
+    Session:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minimum: 6
+
+    UserSession:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        token:
+          type: string
+
+    ToolPaginate:
+      type: object
+      properties:
+        page:
+          type: integer
+        perPage:
+          type: integer
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tool'
+        total:
+          type: integer
+        totalPage:
+          type: integer
+
+    Tool:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int
+        title:
+          type: string
+        description:
+          type: string
+        link:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
