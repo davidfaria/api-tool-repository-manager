@@ -1,8 +1,26 @@
+import jwt from 'jsonwebtoken';
 import request from 'supertest';
 import app from '../../src/app';
 import factory from '../factories';
 import truncate from '../util/truncate';
 import Tool from '../../src/app/models/Tool';
+
+import authConfig from '../../src/config/auth';
+
+let USER_SESSION;
+let TOKEN;
+
+beforeAll(async () => {
+  USER_SESSION = await factory.create('User', {
+    name: 'David Faria',
+    email: 'davidfaria89@gmail.com',
+    password: '123456',
+  });
+
+  TOKEN = jwt.sign({ id: USER_SESSION.id }, authConfig.secret, {
+    expiresIn: authConfig.expiresIn,
+  });
+});
 
 beforeEach(async () => {
   await truncate();
@@ -14,7 +32,9 @@ describe('Tests Integration Tools', () => {
 
     // Obs. params default (PAGE: 1, PER_PAGE: 5)
 
-    const response = await request(app).get('/tools');
+    const response = await request(app)
+      .get('/tools')
+      .set('Authorization', `bearer ${TOKEN}`);
 
     expect(response.status).toBe(200);
     expect(response.body.data.length).toBe(tools.length);
@@ -35,9 +55,11 @@ describe('Tests Integration Tools', () => {
       tag: 'node',
     };
 
-    const response = await request(app).get('/tools/search', {
-      params,
-    });
+    const response = await request(app)
+      .get('/tools/search', {
+        params,
+      })
+      .set('Authorization', `bearer ${TOKEN}`);
 
     expect(response.status).toBe(200);
   });
@@ -59,7 +81,8 @@ describe('Tests Integration Tools', () => {
 
     const response = await request(app)
       .post('/tools')
-      .send(tool);
+      .send(tool)
+      .set('Authorization', `bearer ${TOKEN}`);
 
     expect(response.status).toBe(201);
     expect(response.body).toHaveProperty('id');
@@ -68,7 +91,9 @@ describe('Tests Integration Tools', () => {
 
   it('Should be able to delete tool by id', async () => {
     const tool = await factory.create('Tool');
-    const response = await request(app).delete(`/tools/${tool.id}`);
+    const response = await request(app)
+      .delete(`/tools/${tool.id}`)
+      .set('Authorization', `bearer ${TOKEN}`);
     expect(response.status).toBe(204);
 
     const checkDeleted = await Tool.findByPk(tool.id);
