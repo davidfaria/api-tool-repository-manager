@@ -12,9 +12,17 @@ Api NodeJs
 
 `git clone https://github.com/davidfaria/api-tool-repository-manager.git`
 
+_Obs: entre na pasta do projeto para executar os comandos abaixo: `cd api-tool-repository-manager`_
+
 - Instalar dependências
 
 `yarn install`
+
+- Configurando variáveis de ambiente.
+
+_Obs. preencha os valores de acesso ao banco de dados etc..._
+
+`cp .env.example .env`
 
 - Preparar base de dados (docker e docker-compose)
 
