@@ -42,6 +42,18 @@ _Obs. preencha os valores de acesso ao banco de dados etc..._
 
 # Testes
 
+- Editar arquivo .env.test com os dados de teste.
+
+- Criar base de dados de teste
+
+`docker exec -it bx-postgres bash`
+
+`su postgres`
+
+`psql`
+
+`CREATE DATABASE db_test` _Obs. Mesmo nome adicionado no arquivo .env.test_
+
 ## Run Testes (Jest)
 
 `yarn test`
