@@ -21,7 +21,7 @@ const swaggerDocument = YAML.load(resolve(__dirname, 'swagger.yaml'));
 
 const routes = new Router();
 
-routes.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+routes.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 routes.get('/', (req, res) =>
   res.json({
